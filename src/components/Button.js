@@ -1,10 +1,10 @@
 import React, { PropTypes } from 'react';
 import { TouchableOpacity, Text, View, StyleSheet } from 'react-native';
 
-const Button = ({ text, onPress }) => {
+const Button = ({ text, onPress, style }) => {
   return (
     <TouchableOpacity onPress={onPress}>
-      <View style={styles.button}>
+      <View style={[styles.button, style]}>
         <Text style={styles.text}>{text}</Text>
       </View>
     </TouchableOpacity>
@@ -19,7 +19,7 @@ Button.propTypes = {
 const styles = StyleSheet.create({
   button: {
     borderRadius: 3,
-    backgroundColor: 'red',
+    backgroundColor: 'green',
     alignItems: 'center',
   },
   text: {

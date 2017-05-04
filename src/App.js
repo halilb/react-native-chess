@@ -4,13 +4,13 @@ import { StackNavigator } from 'react-navigation';
 
 import Home from './containers/Home';
 import Training from './containers/Training';
+import PlayerVsAI from './containers/PlayerVsAI';
 
 const Chess = StackNavigator(
   {
     Home: { screen: Home },
-    Training: {
-      screen: Training,
-    },
+    Training: { screen: Training },
+    PlayerVsAI: { screen: PlayerVsAI },
   },
   {
     mode: 'modal',

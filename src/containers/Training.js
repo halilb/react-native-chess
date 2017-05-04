@@ -49,6 +49,7 @@ export default class Training extends Component {
     game.move({
       from,
       to,
+      promotion: game.QUEEN,
     });
 
     if (moveLine === 'win') {
