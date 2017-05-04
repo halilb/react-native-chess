@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { Dimensions, View, StyleSheet } from 'react-native';
 
 import { Chess } from 'chess.js';
 import Sound from 'react-native-sound';
@@ -7,6 +7,7 @@ import Sound from 'react-native-sound';
 import Square from './Square';
 import Piece from './Piece';
 
+const screenWidth = Dimensions.get('window').width;
 const DIMENSION = 8;
 const COLUMN_NAMES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
@@ -25,6 +26,7 @@ export default class BoardView extends Component {
   };
 
   static defaultProps = {
+    size: screenWidth - 32,
     showNotation: true,
     color: 'w',
     shouldSelectPiece: () => true,

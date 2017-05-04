@@ -5,12 +5,15 @@ import { Button } from '../components';
 
 export default class HomeScreen extends Component {
   static navigationOptions = {
-    title: 'Chess',
+    title: 'Home',
   };
+
   render() {
+    const { navigate } = this.props.navigation;
+
     return (
       <View style={styles.container}>
-        <Button text={'Training'} onPress={() => {}} />
+        <Button text={'Training'} onPress={() => navigate('Training')} />
       </View>
     );
   }
