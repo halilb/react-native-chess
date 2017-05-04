@@ -2,12 +2,16 @@ import React, { Component, PropTypes } from 'react';
 import { View, StyleSheet } from 'react-native';
 
 import { Chess } from 'chess.js';
+import Sound from 'react-native-sound';
 
 import Square from './Square';
 import Piece from './Piece';
 
 const DIMENSION = 8;
 const COLUMN_NAMES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+
+const moveSound = new Sound('move.mp3', Sound.MAIN_BUNDLE);
+const captureSound = new Sound('capture.mp3', Sound.MAIN_BUNDLE);
 
 export default class BoardView extends Component {
   static propTypes = {
@@ -55,8 +59,14 @@ export default class BoardView extends Component {
       to,
       from: from || selectedPiece.position,
     };
+    const moveResult = game.move(moveConfig);
 
-    game.move(moveConfig);
+    if (moveResult.captured) {
+      captureSound.play();
+    } else {
+      moveSound.play();
+    }
+
     onMove(moveConfig);
 
     this.setState({
@@ -77,7 +87,7 @@ export default class BoardView extends Component {
     const { board, game } = this.state;
     const piece = board.find(b => b.position === position);
 
-    // remove the piece
+    // capture the piece
     if (piece.canMoveHere) {
       this.movePiece(position);
       return;

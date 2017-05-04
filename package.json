@@ -9,7 +9,8 @@
   "dependencies": {
     "chess.js": "github:jhlywa/chess.js",
     "react": "16.0.0-alpha.6",
-    "react-native": "0.44.0"
+    "react-native": "0.44.0",
+    "react-native-sound": "^0.10.0"
   },
   "devDependencies": {
     "babel-jest": "19.0.0",
