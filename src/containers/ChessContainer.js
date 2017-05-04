@@ -24,6 +24,7 @@ export default class PlayerVsRandom extends Component {
     game.move({
       from,
       to,
+      promotion: game.QUEEN,
     });
 
     if (game.turn() !== userColor) {

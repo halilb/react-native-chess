@@ -58,6 +58,7 @@ export default class BoardView extends Component {
     const moveConfig = {
       to,
       from: from || selectedPiece.position,
+      promotion: game.QUEEN,
     };
     const moveResult = game.move(moveConfig);
 
