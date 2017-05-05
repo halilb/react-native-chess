@@ -23,6 +23,10 @@ export default class PlayerVsLichessAI extends Component {
     this.createGame();
   }
 
+  componentWillUnmount() {
+    clearInterval(this.interval);
+  }
+
   createGame() {
     fetch('https://en.lichess.org/setup/ai', {
       method: 'POST',
@@ -85,7 +89,7 @@ export default class PlayerVsLichessAI extends Component {
       });
       console.log('ws open');
       // ping every second
-      setInterval(
+      this.interval = setInterval(
         () => {
           this.sendMessage({ t: 'p', v: 2 });
         },
