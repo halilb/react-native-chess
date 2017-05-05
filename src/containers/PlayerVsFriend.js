@@ -25,7 +25,14 @@ export default class PlayerVsFriend extends Component {
   }
 
   componentDidMount() {
-    this.createGame();
+    const { params } = this.props.navigation.state;
+    const { gameId } = params;
+
+    if (gameId) {
+      this.joinGame(gameId);
+    } else {
+      this.createGame();
+    }
   }
 
   createGame() {
@@ -47,13 +54,36 @@ export default class PlayerVsFriend extends Component {
     })
       .then(res => res.json())
       .then(res => {
-        const socketId = res.challenge.id;
-        const socketUrl = `${SOCKET_BASE_URL}/challenge/${socketId}/socket/v2?sri=${this.clientId}&mobile=1`;
-        this.createSocket(socketUrl, socketId);
+        const gameId = res.challenge.id;
+        const socketUrl = `${SOCKET_BASE_URL}/challenge/${gameId}/socket/v2?sri=${this.clientId}&mobile=1`;
+        this.createSocket(socketUrl, gameId);
         this.setState({
           initialized: true,
-          invitationId: socketId,
+          invitationId: gameId,
         });
+      });
+  }
+
+  joinGame(gameId) {
+    fetch(`${HTTP_BASE_URL}/challenge/${gameId}/accept`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/vnd.lichess.v2+json',
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(res => res.json())
+      .then(res => {
+        if (res.error) {
+          alert(res.error);
+        } else {
+          const socketUrl = `${SOCKET_BASE_URL}${res.url.socket}?sri=${this.clientId}&mobile=1`;
+          clearInterval(this.intervalId);
+          this.createSocket(socketUrl);
+          this.setState({
+            initialized: true,
+          });
+        }
       });
   }
 
@@ -174,7 +204,7 @@ export default class PlayerVsFriend extends Component {
               To invite someone to play, give this URL
             </Text>
             <Text style={[styles.text, styles.urlText]}>
-              {`https://lichess.org/${invitationId}`}
+              {`lichess599://${invitationId}`}
             </Text>
             <Text style={styles.text}>
               The first person to come to this URL will play with you.
@@ -232,9 +262,11 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 12,
     marginVertical: 16,
+    textAlign: 'center',
   },
   urlText: {
     backgroundColor: 'grey',
     paddingVertical: 16,
+    color: 'white',
   },
 });

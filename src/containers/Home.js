@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Linking, StyleSheet, View } from 'react-native';
 
 import { Button } from '../components';
 
@@ -9,8 +9,22 @@ export default class HomeScreen extends Component {
   };
 
   componentDidMount() {
+    Linking.getInitialURL().then(url => {
+      if (url) {
+        this.handleOpenURL(url);
+      }
+    });
+
+    Linking.addEventListener('url', event => this.handleOpenURL(event.url));
     // sets session cookie
     fetch('https://en.lichess.org/account/info');
+  }
+
+  handleOpenURL(url) {
+    const { navigate } = this.props.navigation;
+    const id = url.replace('lichess599://', '');
+
+    navigate('PlayerVsFriend', { gameId: id });
   }
 
   render() {
