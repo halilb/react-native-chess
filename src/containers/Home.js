@@ -28,6 +28,11 @@ export default class HomeScreen extends Component {
           text={'Play with the machine'}
           onPress={() => navigate('PlayerVsAI')}
         />
+        <Button
+          style={styles.button}
+          text={'Play with a friend'}
+          onPress={() => navigate('PlayerVsFriend')}
+        />
       </View>
     );
   }
