@@ -24,36 +24,29 @@ export default class PlayerVsFriend extends Component {
       invitationId: '',
       game: new Chess(),
       gameStarted: false,
+      userColor: '',
     };
   }
 
   componentDidMount() {
     const params = this.props.navigation.state.params || {};
-    const { gameId } = params;
+    const { gameId, playConfig } = params;
 
     if (gameId) {
       this.joinGame(gameId);
     } else {
-      this.createGame();
+      this.createGame(playConfig);
     }
   }
 
-  createGame() {
+  createGame(playConfig) {
     fetch(`${HTTP_BASE_URL}/setup/friend`, {
       method: 'POST',
       headers: {
         Accept: 'application/vnd.lichess.v2+json',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        variant: '1',
-        timeMode: '1',
-        days: '2',
-        time: '10',
-        increment: '0',
-        color: 'white',
-        mode: '0',
-      }),
+      body: playConfig,
     })
       .then(res => res.json())
       .then(res => {
@@ -63,6 +56,7 @@ export default class PlayerVsFriend extends Component {
         this.setState({
           initialized: true,
           invitationId: gameId,
+          userColor: res.challenge.color === 'white' ? 'w' : 'b',
         });
       });
   }
@@ -86,6 +80,7 @@ export default class PlayerVsFriend extends Component {
           this.setState({
             initialized: true,
             gameStarted: true,
+            userColor: res.player.color === 'white' ? 'w' : 'b',
           });
         }
       });
@@ -93,6 +88,7 @@ export default class PlayerVsFriend extends Component {
 
   createSocket = (socketUrl, socketId) => {
     console.log('socket: ' + socketUrl);
+    const { game } = this.state;
     this.ws = new WebSocket(socketUrl);
 
     this.ws.onmessage = e => {
@@ -100,7 +96,7 @@ export default class PlayerVsFriend extends Component {
       console.log(`received: ${e.data}`);
       const data = JSON.parse(e.data);
 
-      if (data.t === 'reload' && data.v === 3 && !this.gameFetched) {
+      if (data.t === 'reload' && data.v > 1 && !this.gameFetched) {
         this.gameFetched = true;
 
         // this sets cookie
@@ -124,7 +120,7 @@ export default class PlayerVsFriend extends Component {
       }
 
       let uci;
-      if (data.t === 'move' && data.d.ply % 2 === 0) {
+      if (data.t === 'move' && data.v > game.history().length) {
         uci = data.d.uci;
       } else if (data.t === 'b') {
         const first = data.d[0];
@@ -154,7 +150,10 @@ export default class PlayerVsFriend extends Component {
       // ping every second
       this.intervalId = setInterval(
         () => {
-          this.sendMessage({ t: 'p', v: 2 });
+          this.sendMessage({
+            t: 'p',
+            v: game.history().length,
+          });
         },
         1000,
       );
@@ -168,13 +167,13 @@ export default class PlayerVsFriend extends Component {
   }
 
   onMove = ({ from, to }) => {
-    const { game } = this.state;
+    const { game, userColor } = this.state;
     game.move({
       from,
       to,
     });
 
-    if (game.turn() === 'b') {
+    if (game.turn() !== userColor) {
       this.sendMessage({
         t: 'move',
         d: {
@@ -186,13 +185,13 @@ export default class PlayerVsFriend extends Component {
   };
 
   shouldSelectPiece = piece => {
-    const { game } = this.state;
+    const { game, userColor } = this.state;
     const turn = game.turn();
     if (
       game.in_checkmate() === true ||
       game.in_draw() === true ||
-      turn !== 'w' ||
-      piece.color !== 'w'
+      turn !== userColor ||
+      piece.color !== userColor
     ) {
       return false;
     }
@@ -233,7 +232,7 @@ export default class PlayerVsFriend extends Component {
   }
 
   render() {
-    const { initialized, fen } = this.state;
+    const { initialized, fen, userColor } = this.state;
 
     if (!initialized) {
       return <ActivityIndicator style={styles.container} animating />;
@@ -244,6 +243,7 @@ export default class PlayerVsFriend extends Component {
         <Board
           ref={board => this.board = board}
           fen={fen}
+          color={userColor}
           shouldSelectPiece={this.shouldSelectPiece}
           onMove={this.onMove}
         />

@@ -6,6 +6,8 @@ import SegmentedControlTab from 'react-native-segmented-control-tab';
 
 import { Button } from '../components';
 
+const COLORS = ['white', 'random', 'black'];
+
 export default class HomeScreen extends Component {
   static navigationOptions = {
     title: 'Home',
@@ -53,12 +55,30 @@ export default class HomeScreen extends Component {
 
   create = () => {
     const { navigate } = this.props.navigation;
-    const { playVsAI } = this.state;
+    const {
+      selectedColorIndex,
+      selectedTimeIndex,
+      modalDisplayed,
+      totalMinutes,
+      incrementSeconds,
+      aiLevel,
+      playVsAI,
+    } = this.state;
+    const playConfig = JSON.stringify({
+      variant: 1,
+      timeMode: selectedTimeIndex,
+      days: '2',
+      time: `${totalMinutes}`,
+      increment: `${incrementSeconds}`,
+      level: `${aiLevel}`,
+      color: COLORS[selectedColorIndex],
+      mode: '0',
+    });
 
     if (playVsAI) {
-      navigate('PlayerVsAI');
+      navigate('PlayerVsAI', { playConfig });
     } else {
-      navigate('PlayerVsFriend');
+      navigate('PlayerVsFriend', { playConfig });
     }
 
     this.setState({ modalDisplayed: false });
@@ -123,7 +143,7 @@ export default class HomeScreen extends Component {
         <View style={styles.modalContent}>
           <Text style={styles.label}>Color</Text>
           <SegmentedControlTab
-            values={['White', 'Random', 'Black']}
+            values={COLORS}
             selectedIndex={selectedColorIndex}
             onTabPress={index => this.setState({ selectedColorIndex: index })}
           />

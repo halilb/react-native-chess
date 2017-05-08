@@ -64,7 +64,7 @@ export default class BoardView extends Component {
     };
     const moveResult = game.move(moveConfig);
 
-    if (moveResult.captured) {
+    if (moveResult && moveResult.captured) {
       captureSound.play();
     } else {
       moveSound.play();
