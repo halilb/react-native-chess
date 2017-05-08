@@ -2,11 +2,13 @@ import React, { Component } from 'react';
 import { ActivityIndicator, View, StyleSheet, Text } from 'react-native';
 
 import { Chess } from 'chess.js';
+import Share from 'react-native-share';
 
 import { Button, Board } from '../components';
 
 const HTTP_BASE_URL = 'https://en.lichess.org';
 const SOCKET_BASE_URL = 'wss://socket.lichess.org';
+const URL_SCHEME = 'lichess599://';
 
 export default class PlayerVsFriend extends Component {
   static navigationOptions = {
@@ -25,7 +27,7 @@ export default class PlayerVsFriend extends Component {
   }
 
   componentDidMount() {
-    const { params } = this.props.navigation.state;
+    const params = this.props.navigation.state.params || {};
     const { gameId } = params;
 
     if (gameId) {
@@ -194,22 +196,33 @@ export default class PlayerVsFriend extends Component {
     return true;
   };
 
+  share = () => {
+    const { invitationId } = this.state;
+    Share.open({
+      title: "Let's play chess",
+      url: `${URL_SCHEME}${invitationId}`,
+    });
+  };
+
   renderInvitationMessage() {
     const { invitationId } = this.state;
     if (invitationId) {
       return (
         <View style={styles.fullScreen}>
           <View style={styles.invitationBox}>
+            <Text style={[styles.text, styles.headline]}>
+              Waiting for a friend!
+            </Text>
             <Text style={styles.text}>
               To invite someone to play, give this URL
             </Text>
             <Text style={[styles.text, styles.urlText]}>
-              {`lichess599://${invitationId}`}
+              {`${URL_SCHEME}${invitationId}`}
             </Text>
             <Text style={styles.text}>
               The first person to come to this URL will play with you.
             </Text>
-            <Button text={'Share game URL'} onPress={() => alert('share')} />
+            <Button text={'Share game URL'} onPress={this.share} />
           </View>
         </View>
       );
@@ -261,12 +274,17 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 12,
-    marginVertical: 16,
+    marginVertical: 8,
     textAlign: 'center',
   },
   urlText: {
     backgroundColor: 'grey',
     paddingVertical: 16,
     color: 'white',
+  },
+  headline: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    margin: 0,
   },
 });
