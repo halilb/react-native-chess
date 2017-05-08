@@ -8,8 +8,8 @@
   },
   "dependencies": {
     "chess.js": "github:jhlywa/chess.js",
-    "react": "16.0.0-alpha.6",
-    "react-native": "0.44.0",
+    "react": "15.4.1",
+    "react-native": "0.42.3",
     "react-native-share": "^1.0.20",
     "react-native-sound": "^0.10.0",
     "react-navigation": "^1.0.0-beta.9"
