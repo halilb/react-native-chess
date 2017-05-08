@@ -23,6 +23,7 @@ export default class PlayerVsFriend extends Component {
       initialized: false,
       invitationId: '',
       game: new Chess(),
+      gameStarted: false,
     };
   }
 
@@ -84,6 +85,7 @@ export default class PlayerVsFriend extends Component {
           this.createSocket(socketUrl);
           this.setState({
             initialized: true,
+            gameStarted: true,
           });
         }
       });
@@ -115,6 +117,7 @@ export default class PlayerVsFriend extends Component {
                 const socketUrl = `${SOCKET_BASE_URL}${res.url.socket}?sri=${this.clientId}&mobile=1`;
                 clearInterval(this.intervalId);
                 this.createSocket(socketUrl);
+                this.setState({ gameStarted: true });
               }
             });
         });
@@ -205,8 +208,8 @@ export default class PlayerVsFriend extends Component {
   };
 
   renderInvitationMessage() {
-    const { invitationId } = this.state;
-    if (invitationId) {
+    const { invitationId, gameStarted } = this.state;
+    if (invitationId && !gameStarted) {
       return (
         <View style={styles.fullScreen}>
           <View style={styles.invitationBox}>
