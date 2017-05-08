@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
-import { Linking, StyleSheet, View } from 'react-native';
+import { Slider, Text, Linking, StyleSheet, View } from 'react-native';
+
+import Modal from 'react-native-modalbox';
+import SegmentedControlTab from 'react-native-segmented-control-tab';
 
 import { Button } from '../components';
 
@@ -7,6 +10,20 @@ export default class HomeScreen extends Component {
   static navigationOptions = {
     title: 'Home',
   };
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      modalDisplayed: false,
+      selectedColorIndex: 1,
+      selectedTimeIndex: 0,
+      totalMinutes: 5,
+      incrementSeconds: 8,
+      aiLevel: 3,
+      playVsAI: false,
+    };
+  }
 
   componentDidMount() {
     Linking.getInitialURL().then(url => {
@@ -27,6 +44,109 @@ export default class HomeScreen extends Component {
     navigate('PlayerVsFriend', { gameId: id });
   }
 
+  displayModal(playVsAI) {
+    this.setState({
+      modalDisplayed: true,
+      playVsAI,
+    });
+  }
+
+  create = () => {
+    const { navigate } = this.props.navigation;
+    const { playVsAI } = this.state;
+
+    if (playVsAI) {
+      navigate('PlayerVsAI');
+    } else {
+      navigate('PlayerVsFriend');
+    }
+
+    this.setState({ modalDisplayed: false });
+  };
+
+  renderModal() {
+    const {
+      selectedColorIndex,
+      selectedTimeIndex,
+      modalDisplayed,
+      totalMinutes,
+      incrementSeconds,
+      aiLevel,
+      playVsAI,
+    } = this.state;
+
+    let timePickers;
+    if (selectedTimeIndex === 1) {
+      timePickers = (
+        <View>
+          <Text style={styles.label}>Minutes per side: {totalMinutes}</Text>
+          <Slider
+            style={styles.slider}
+            minimumValue={1}
+            maximumValue={150}
+            step={1}
+            onValueChange={value => this.setState({ totalMinutes: value })}
+            value={totalMinutes}
+          />
+          <Text style={styles.label}>
+            Increment in seconds: {incrementSeconds}
+          </Text>
+          <Slider
+            minimumValue={0}
+            maximumValue={180}
+            step={1}
+            onValueChange={value => this.setState({ incrementSeconds: value })}
+            value={incrementSeconds}
+          />
+        </View>
+      );
+    }
+
+    let aiLevelPicker;
+    if (playVsAI) {
+      aiLevelPicker = (
+        <View>
+          <Text style={styles.label}>A.I. level {aiLevel}</Text>
+          <Slider
+            minimumValue={1}
+            maximumValue={8}
+            step={1}
+            onValueChange={value => this.setState({ aiLevel: value })}
+            value={aiLevel}
+          />
+        </View>
+      );
+    }
+
+    return (
+      <Modal isOpen={modalDisplayed} backdropOpacity={0.8} style={styles.modal}>
+        <View style={styles.modalContent}>
+          <Text style={styles.label}>Color</Text>
+          <SegmentedControlTab
+            values={['White', 'Random', 'Black']}
+            selectedIndex={selectedColorIndex}
+            onTabPress={index => this.setState({ selectedColorIndex: index })}
+          />
+          <View style={styles.clockContainer}>
+            <Text style={styles.label}>Clock</Text>
+            <SegmentedControlTab
+              values={['Unlimited', 'Real time']}
+              selectedIndex={selectedTimeIndex}
+              onTabPress={index => this.setState({ selectedTimeIndex: index })}
+            />
+            {timePickers}
+          </View>
+          {aiLevelPicker}
+          <Button
+            style={styles.modalButton}
+            text={'Create'}
+            onPress={this.create}
+          />
+        </View>
+      </Modal>
+    );
+  }
+
   render() {
     const { navigate } = this.props.navigation;
 
@@ -40,13 +160,14 @@ export default class HomeScreen extends Component {
         <Button
           style={styles.button}
           text={'Play with the machine'}
-          onPress={() => navigate('PlayerVsAI')}
+          onPress={() => this.displayModal(true)}
         />
         <Button
           style={styles.button}
           text={'Play with a friend'}
-          onPress={() => navigate('PlayerVsFriend')}
+          onPress={() => this.displayModal(false)}
         />
+        {this.renderModal()}
       </View>
     );
   }
@@ -59,6 +180,30 @@ const styles = StyleSheet.create({
     padding: 32,
   },
   button: {
+    marginTop: 16,
+  },
+  modalButton: {
+    marginTop: 16,
+    backgroundColor: '#D85000',
+  },
+  modal: {
+    padding: 16,
+    backgroundColor: 'transparent',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 16,
+  },
+  label: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 16,
+    padding: 4,
+  },
+  clockContainer: {
+    backgroundColor: '#81a59a',
+    padding: 16,
     marginTop: 16,
   },
 });
