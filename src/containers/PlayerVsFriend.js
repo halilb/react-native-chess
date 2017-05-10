@@ -47,6 +47,10 @@ export default class PlayerVsFriend extends Component {
     }
   }
 
+  componentWillUnmount() {
+    clearInterval(this.intervalId);
+  }
+
   createGame(playConfig) {
     fetch(`${HTTP_BASE_URL}/setup/friend`, {
       method: 'POST',
@@ -159,6 +163,7 @@ export default class PlayerVsFriend extends Component {
 
     this.ws.onclose = e => {
       console.log(e.code, e.reason);
+      this.createSocket(socketUrl, socketId);
     };
 
     this.ws.onopen = () => {

@@ -56,6 +56,8 @@ export default class PlayerVsLichessAI extends Component {
     const { game } = this.state;
     const socketUrl = res.url.socket;
     const clientId = Math.random().toString(36).substring(2);
+    clearInterval(this.interval);
+    this.wsReady = false;
     this.ws = new WebSocket(
       `wss://socket.lichess.org${socketUrl}?sri=${clientId}&mobile=1`,
     );
@@ -81,8 +83,15 @@ export default class PlayerVsLichessAI extends Component {
         const from = uci.substring(0, 2);
         const to = uci.substring(2, 4);
         this.board.movePiece(to, from);
-        this.latestClock = clock;
+        if (clock) {
+          this.latestClock = clock;
+        }
       }
+    };
+
+    this.ws.onclose = e => {
+      console.log(e.code, e.reason);
+      this.createSocket(socketUrl, socketId);
     };
 
     this.ws.onerror = e => {
@@ -91,6 +100,7 @@ export default class PlayerVsLichessAI extends Component {
     };
 
     this.ws.onopen = () => {
+      this.wsReady = true;
       this.setState({
         initialized: true,
         userColor: res.player.color === 'white' ? 'w' : 'b',
@@ -110,9 +120,11 @@ export default class PlayerVsLichessAI extends Component {
   };
 
   sendMessage(obj) {
-    const str = JSON.stringify(obj);
-    console.log(`sending: ${str}`);
-    this.ws.send(str);
+    if (this.wsReady) {
+      const str = JSON.stringify(obj);
+      console.log(`sending: ${str}`);
+      this.ws.send(str);
+    }
   }
 
   onMove = ({ from, to }) => {
@@ -143,6 +155,7 @@ export default class PlayerVsLichessAI extends Component {
     const { game, userColor } = this.state;
     const turn = game.turn();
     if (
+      !this.wsReady ||
       game.in_checkmate() === true ||
       game.in_draw() === true ||
       turn !== userColor ||
