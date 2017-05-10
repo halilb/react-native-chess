@@ -19,12 +19,8 @@ export default class PlayerVsFriend extends Component {
     super(props);
 
     const { time } = this.props.navigation.state.params;
-    this.latestClock = {
-      white: time,
-      black: time,
-    };
-
     this.clientId = Math.random().toString(36).substring(2);
+
     this.state = {
       initialized: false,
       invitationId: '',
@@ -149,7 +145,7 @@ export default class PlayerVsFriend extends Component {
       }
 
       let moveData;
-      if (data.t === 'move' && data.v > game.history().length) {
+      if (data.t === 'move') {
         moveData = data.d;
       } else if (data.t === 'b') {
         const first = data.d[0];
@@ -160,11 +156,21 @@ export default class PlayerVsFriend extends Component {
 
       if (moveData) {
         const { uci, clock } = moveData;
-        const from = uci.substring(0, 2);
-        const to = uci.substring(2, 4);
-        this.board.movePiece(to, from);
+
+        // opponent move
+        if (data.v > game.history().length) {
+          const { uci } = moveData;
+          const from = uci.substring(0, 2);
+          const to = uci.substring(2, 4);
+          this.board.movePiece(to, from);
+        }
+
         if (clock) {
-          this.latestClock = clock;
+          const { white, black } = clock;
+          this.setState({
+            whiteClock: white,
+            blackClock: black,
+          });
         }
       }
     };
@@ -222,11 +228,6 @@ export default class PlayerVsFriend extends Component {
         },
       });
     }
-
-    this.setState({
-      whiteClock: this.latestClock.white,
-      blackClock: this.latestClock.black,
-    });
   };
 
   shouldSelectPiece = piece => {

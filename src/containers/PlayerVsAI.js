@@ -74,7 +74,7 @@ export default class PlayerVsLichessAI extends Component {
         // b for batch
         const first = data.d[0];
         if (first && first.d.status && first.d.status.name === 'mate') {
-          uci = first.d;
+          moveData = first.d;
         }
       }
 
