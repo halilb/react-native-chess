@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import { ActivityIndicator, View, StyleSheet } from 'react-native';
+import { ActivityIndicator, View, StyleSheet, Text } from 'react-native';
 
 import { Chess } from 'chess.js';
 
-import { Board } from '../components';
+import { Board, Clock } from '../components';
 
 export default class PlayerVsLichessAI extends Component {
   static navigationOptions = {
@@ -13,10 +13,18 @@ export default class PlayerVsLichessAI extends Component {
   constructor(props) {
     super(props);
 
+    const { time } = this.props.navigation.state.params;
+    this.latestClock = {
+      white: time,
+      black: time,
+    };
+
     this.state = {
       initialized: false,
       userColor: '',
       game: new Chess(),
+      whiteClock: time,
+      blackClock: time,
     };
   }
 
@@ -57,21 +65,23 @@ export default class PlayerVsLichessAI extends Component {
       console.log(`received: ${e.data}`);
       const data = JSON.parse(e.data);
 
-      let uci;
+      let moveData;
       if (data.t === 'move' && data.v > game.history().length) {
-        uci = data.d.uci;
+        moveData = data.d;
       } else if (data.t === 'b') {
         // b for batch
         const first = data.d[0];
         if (first && first.d.status && first.d.status.name === 'mate') {
-          uci = first.d.uci;
+          uci = first.d;
         }
       }
 
-      if (uci) {
+      if (moveData) {
+        const { uci, clock } = moveData;
         const from = uci.substring(0, 2);
         const to = uci.substring(2, 4);
         this.board.movePiece(to, from);
+        this.latestClock = clock;
       }
     };
 
@@ -122,6 +132,11 @@ export default class PlayerVsLichessAI extends Component {
         },
       });
     }
+
+    this.setState({
+      whiteClock: this.latestClock.white,
+      blackClock: this.latestClock.black,
+    });
   };
 
   shouldSelectPiece = piece => {
@@ -139,7 +154,19 @@ export default class PlayerVsLichessAI extends Component {
   };
 
   render() {
-    const { initialized, fen, userColor } = this.state;
+    const {
+      game,
+      initialized,
+      fen,
+      userColor,
+      whiteClock,
+      blackClock,
+    } = this.state;
+    const isReverseBoard = userColor === 'b';
+    const turn = game.turn();
+    const historyLength = game.history().length;
+    const whiteTurn = historyLength > 0 && turn === 'w';
+    const blackTurn = historyLength > 1 && turn === 'b';
 
     if (!initialized) {
       return <ActivityIndicator style={styles.container} animating />;
@@ -147,12 +174,20 @@ export default class PlayerVsLichessAI extends Component {
 
     return (
       <View style={styles.container}>
+        <Clock
+          time={isReverseBoard ? whiteClock : blackClock}
+          enabled={isReverseBoard ? whiteTurn : blackTurn}
+        />
         <Board
           ref={board => this.board = board}
           fen={fen}
           color={userColor}
           shouldSelectPiece={this.shouldSelectPiece}
           onMove={this.onMove}
+        />
+        <Clock
+          time={isReverseBoard ? blackClock : whiteClock}
+          enabled={isReverseBoard ? blackTurn : whiteTurn}
         />
       </View>
     );
@@ -162,9 +197,9 @@ export default class PlayerVsLichessAI extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
     padding: 16,
-    backgroundColor: '#EEEEEE',
+    backgroundColor: 'black',
   },
 });

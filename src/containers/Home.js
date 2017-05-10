@@ -76,9 +76,15 @@ export default class HomeScreen extends Component {
     });
 
     if (playVsAI) {
-      navigate('PlayerVsAI', { playConfig });
+      navigate('PlayerVsAI', {
+        playConfig,
+        time: selectedTimeIndex === 1 ? totalMinutes * 60 : -1,
+      });
     } else {
-      navigate('PlayerVsFriend', { playConfig });
+      navigate('PlayerVsFriend', {
+        playConfig,
+        time: selectedTimeIndex === 1 ? totalMinutes * 60 : -1,
+      });
     }
 
     this.setState({ modalDisplayed: false });
