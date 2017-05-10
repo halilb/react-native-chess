@@ -34,6 +34,7 @@ export default class PlayerVsLichessAI extends Component {
 
   componentWillUnmount() {
     clearInterval(this.interval);
+    this.ws = null;
   }
 
   createGame() {
@@ -87,11 +88,6 @@ export default class PlayerVsLichessAI extends Component {
           this.latestClock = clock;
         }
       }
-    };
-
-    this.ws.onclose = e => {
-      console.log(e.code, e.reason);
-      this.createSocket(socketUrl, socketId);
     };
 
     this.ws.onerror = e => {

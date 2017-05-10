@@ -38,10 +38,19 @@ export default class Clock extends Component {
     );
   }
 
+  componentWillUnmount() {
+    clearInterval(this.intervalId);
+  }
+
   render() {
+    const { enabled } = this.props;
     const { time } = this.state;
     if (time < 0) {
-      return null;
+      return (
+        <Text style={styles.waiting}>
+          {enabled ? 'Waiting for player!' : ' '}
+        </Text>
+      );
     }
 
     let minutes = '' +
@@ -75,5 +84,11 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 24,
     fontWeight: 'bold',
+  },
+  waiting: {
+    margin: 16,
+    alignSelf: 'flex-end',
+    fontSize: 14,
+    color: '#dd465b',
   },
 });

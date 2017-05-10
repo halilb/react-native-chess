@@ -45,6 +45,8 @@ export default class PlayerVsFriend extends Component {
 
   componentWillUnmount() {
     clearInterval(this.interval);
+    this.gameSocketUrl = null;
+    this.ws = null;
   }
 
   createGame(playConfig) {
@@ -155,23 +157,19 @@ export default class PlayerVsFriend extends Component {
       }
 
       if (moveData) {
-        const { uci, clock } = moveData;
-
         // opponent move
         if (data.v > game.history().length) {
-          const { uci } = moveData;
+          const uci = moveData.uci;
           const from = uci.substring(0, 2);
           const to = uci.substring(2, 4);
           this.board.movePiece(to, from);
         }
 
-        if (clock) {
-          const { white, black } = clock;
-          this.setState({
-            whiteClock: white,
-            blackClock: black,
-          });
-        }
+        const clock = moveData.clock || {};
+        this.setState({
+          whiteClock: clock.white || -1,
+          blackClock: clock.black || -1,
+        });
       }
     };
 
