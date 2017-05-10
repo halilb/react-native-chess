@@ -48,7 +48,7 @@ export default class PlayerVsFriend extends Component {
   }
 
   componentWillUnmount() {
-    clearInterval(this.intervalId);
+    clearInterval(this.interval);
   }
 
   createGame(playConfig) {
@@ -97,42 +97,55 @@ export default class PlayerVsFriend extends Component {
       });
   }
 
+  retrieveSocketUrl(socketId) {
+    fetch(`${HTTP_BASE_URL}/challenge/${socketId}`).then(() => {
+      fetch(`${HTTP_BASE_URL}/${socketId}`, {
+        headers: {
+          Accept: 'application/vnd.lichess.v2+json',
+          'Content-Type': 'application/json',
+        },
+      })
+        .then(res => res.json())
+        .then(res => {
+          this.gameFetching = false;
+          if (res.url && res.url.socket) {
+            this.gameFetched = true;
+
+            const socketUrl = `${SOCKET_BASE_URL}${res.url.socket}?sri=${this.clientId}&mobile=1`;
+            this.gameSocketUrl = socketUrl;
+            this.createSocket(socketUrl);
+
+            this.setState({
+              gameStarted: true,
+              userColor: res.player.color === 'white' ? 'w' : 'b',
+            });
+          }
+        });
+    });
+  }
+
   createSocket = (socketUrl, socketId) => {
     console.log('socket: ' + socketUrl);
     const { game } = this.state;
+
     this.wsReady = false;
     this.ws = new WebSocket(socketUrl);
-    clearInterval(this.intervalId);
+    clearInterval(this.interval);
 
     this.ws.onmessage = e => {
       // a message was received
       console.log(`received: ${e.data}`);
       const data = JSON.parse(e.data);
 
-      if (data.t === 'reload' && data.v > 1 && !this.gameFetched) {
+      if (
+        data.t === 'reload' &&
+        data.v > 1 &&
+        !this.gameFetched &&
+        !this.gameFetching
+      ) {
         // this sets cookie
-        fetch(`${HTTP_BASE_URL}/challenge/${socketId}`).then(() => {
-          fetch(`${HTTP_BASE_URL}/${socketId}`, {
-            headers: {
-              Accept: 'application/vnd.lichess.v2+json',
-              'Content-Type': 'application/json',
-            },
-          })
-            .then(res => res.json())
-            .then(res => {
-              if (res.url && res.url.socket) {
-                this.gameFetched = true;
-
-                const socketUrl = `${SOCKET_BASE_URL}${res.url.socket}?sri=${this.clientId}&mobile=1`;
-                this.createSocket(socketUrl);
-
-                this.setState({
-                  gameStarted: true,
-                  userColor: res.player.color === 'white' ? 'w' : 'b',
-                });
-              }
-            });
-        });
+        this.gameFetching = true;
+        this.retrieveSocketUrl(socketId);
       }
 
       let moveData;
@@ -163,14 +176,17 @@ export default class PlayerVsFriend extends Component {
 
     this.ws.onclose = e => {
       console.log(e.code, e.reason);
-      this.createSocket(socketUrl, socketId);
+      if (this.gameSocketUrl) {
+        this.createSocket(this.gameSocketUrl);
+      }
     };
 
     this.ws.onopen = () => {
       console.log('ws open');
       this.wsReady = true;
       // ping every second
-      this.intervalId = setInterval(
+      clearInterval(this.interval);
+      this.interval = setInterval(
         () => {
           this.sendMessage({
             t: 'p',
@@ -185,7 +201,7 @@ export default class PlayerVsFriend extends Component {
   sendMessage(obj) {
     if (this.wsReady) {
       const str = JSON.stringify(obj);
-      console.log(`sending: ${str}`);
+      console.log(`${this.interval} sending: ${str}`);
       this.ws.send(str);
     }
   }
