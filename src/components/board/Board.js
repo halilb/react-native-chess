@@ -79,6 +79,7 @@ export default class BoardView extends Component {
 
   undo = () => {
     const { game } = this.state;
+    moveSound.play();
     game.undo();
     this.setState({
       board: this.createBoardData(game),
