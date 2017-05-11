@@ -14,6 +14,7 @@
     "react-native-segmented-control-tab": "^3.0.2",
     "react-native-share": "^1.0.20",
     "react-native-sound": "^0.10.0",
+    "react-native-vector-icons": "^4.1.1",
     "react-navigation": "^1.0.0-beta.9"
   },
   "devDependencies": {
