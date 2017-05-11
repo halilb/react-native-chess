@@ -38,7 +38,8 @@ export default class Training extends Component {
   }
 
   componentDidMount() {
-    this.getNextTraining();
+    const { puzzleData } = this.props.navigation.state.params;
+    this.drawPuzzle(puzzleData);
   }
 
   onMove = ({ from, to }) => {
@@ -99,21 +100,23 @@ export default class Training extends Component {
       },
     })
       .then(res => res.json())
-      .then(res => {
-        const { id, fen, color, initialMove, lines } = res.puzzle;
+      .then(res => this.drawPuzzle(res.puzzle));
+  }
 
-        this.setState(
-          {
-            game: new Chess(fen),
-            puzzleId: id,
-            fen,
-            userColor: color === 'white' ? 'w' : 'b',
-            waiting: true,
-            lines,
-          },
-          () => this.lateMove(initialMove),
-        );
-      });
+  drawPuzzle(data) {
+    const { id, fen, color, initialMove, lines } = data;
+
+    this.setState(
+      {
+        game: new Chess(fen),
+        puzzleId: id,
+        fen,
+        userColor: color === 'white' ? 'w' : 'b',
+        waiting: true,
+        lines,
+      },
+      () => this.lateMove(initialMove),
+    );
   }
 
   nextPuzzle = () => {

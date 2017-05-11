@@ -1,11 +1,21 @@
 import React, { Component } from 'react';
-import { Slider, Text, Linking, StyleSheet, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Slider,
+  Text,
+  Linking,
+  StyleSheet,
+  View,
+  TouchableOpacity,
+} from 'react-native';
 
 import Modal from 'react-native-modalbox';
 import SegmentedControlTab from 'react-native-segmented-control-tab';
+import { Chess } from 'chess.js';
 
-import { Button } from '../components';
+import { Button, Board } from '../components';
 
+const HTTP_BASE_URL = 'https://en.lichess.org';
 const COLORS = ['white', 'random', 'black'];
 
 export default class HomeScreen extends Component {
@@ -17,6 +27,7 @@ export default class HomeScreen extends Component {
     super(props);
 
     this.state = {
+      ready: false,
       modalDisplayed: false,
       selectedColorIndex: 1,
       selectedTimeIndex: 0,
@@ -24,6 +35,8 @@ export default class HomeScreen extends Component {
       incrementSeconds: 8,
       aiLevel: 3,
       playVsAI: false,
+      puzzleFen: 'wrong',
+      puzzleColor: 'w',
     };
   }
 
@@ -36,8 +49,28 @@ export default class HomeScreen extends Component {
 
     Linking.addEventListener('url', event => this.handleOpenURL(event.url));
     // sets session cookie
-    fetch('https://en.lichess.org/account/info');
+    fetch(`${HTTP_BASE_URL}/account/info`).then(this.getDailyPuzzle);
   }
+
+  getDailyPuzzle = () => {
+    fetch(`${HTTP_BASE_URL}/training/daily`, {
+      headers: {
+        Accept: 'application/vnd.lichess.v2+json',
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+    })
+      .then(res => res.json())
+      .then(res => {
+        const { id, fen, color, initialMove, lines } = res.puzzle;
+
+        this.setState({
+          puzzleColor: color === 'white' ? 'w' : 'b',
+          puzzleFen: fen,
+          puzzleData: res.puzzle,
+          ready: true,
+        });
+      });
+  };
 
   handleOpenURL(url) {
     const { navigate } = this.props.navigation;
@@ -173,16 +206,44 @@ export default class HomeScreen extends Component {
     );
   }
 
+  renderPuzzleBoard() {
+    const { navigate } = this.props.navigation;
+    const { puzzleColor, puzzleFen, puzzleData } = this.state;
+
+    return (
+      <View style={styles.puzzleContainer}>
+        <Text style={styles.puzzleHeadline}>Puzzle of the day</Text>
+        <TouchableOpacity onPress={() => navigate('Training', { puzzleData })}>
+          <Board
+            style={styles.board}
+            size={200}
+            color={puzzleColor}
+            fen={puzzleFen}
+            shouldSelectPiece={() => false}
+          />
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  renderActivityIndicator() {
+    if (this.state.ready) {
+      return null;
+    }
+
+    return (
+      <View style={styles.loadingContanier}>
+        <ActivityIndicator animation size={'large'} color={'green'} />
+      </View>
+    );
+  }
+
   render() {
     const { navigate } = this.props.navigation;
 
     return (
       <View style={styles.container}>
-        <Button
-          style={styles.button}
-          text={'Training'}
-          onPress={() => navigate('Training')}
-        />
+        {this.renderPuzzleBoard()}
         <Button
           style={styles.button}
           text={'Play with the machine'}
@@ -194,6 +255,7 @@ export default class HomeScreen extends Component {
           onPress={() => this.displayModal(false)}
         />
         {this.renderModal()}
+        {this.renderActivityIndicator()}
       </View>
     );
   }
@@ -231,5 +293,27 @@ const styles = StyleSheet.create({
     backgroundColor: '#81a59a',
     padding: 16,
     marginTop: 16,
+  },
+  board: {
+    alignSelf: 'center',
+  },
+  puzzleContainer: {
+    alignSelf: 'center',
+  },
+  puzzleHeadline: {
+    color: 'red',
+    fontSize: 16,
+    textAlign: 'center',
+    margin: 4,
+  },
+  loadingContanier: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    paddingTop: 24,
+    opacity: 0.4,
   },
 });
