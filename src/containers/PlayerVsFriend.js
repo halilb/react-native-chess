@@ -151,21 +151,45 @@ export default class PlayerVsFriend extends Component {
       }
 
       let moveData;
+      let victor;
       if (data.t === 'move') {
         moveData = data.d;
+      } else if (data.t === 'end') {
+        victor = data.d;
       } else if (data.t === 'b') {
         const first = data.d[0];
-        if (first && first.d.status && first.d.status.name === 'mate') {
-          moveData = first.d;
+        if (first) {
+          if (first.d.status && first.d.status.name === 'mate') {
+            moveData = first.d;
+          }
+          if (first.t === 'end') {
+            victor = first.d;
+          }
+          if (first.d.winner) {
+            victor = first.d.winner;
+          }
         }
       }
 
-      if (moveData) {
+      if (victor) {
+        dongSound.play();
+        this.setState({
+          victor,
+        });
+        this.ws = null;
+      } else if (moveData) {
         // opponent move
         if (data.v > game.history().length) {
           const uci = moveData.uci;
-          const from = uci.substring(0, 2);
-          const to = uci.substring(2, 4);
+          const castle = moveData.castle;
+          let from = uci.substring(0, 2);
+          let to = uci.substring(2, 4);
+
+          if (castle && castle.king) {
+            from = castle.king[0];
+            to = castle.king[1];
+          }
+
           this.board.movePiece(to, from);
         }
 
@@ -207,7 +231,7 @@ export default class PlayerVsFriend extends Component {
   };
 
   sendMessage(obj) {
-    if (this.wsReady) {
+    if (this.wsReady && this.ws) {
       const str = JSON.stringify(obj);
       console.log(`${this.interval} sending: ${str}`);
       this.ws.send(str);
@@ -233,10 +257,11 @@ export default class PlayerVsFriend extends Component {
   };
 
   shouldSelectPiece = piece => {
-    const { game, userColor } = this.state;
+    const { game, userColor, victor } = this.state;
     const turn = game.turn();
     if (
       !this.wsReady ||
+      victor ||
       game.in_checkmate() === true ||
       game.in_draw() === true ||
       turn !== userColor ||
@@ -254,6 +279,19 @@ export default class PlayerVsFriend extends Component {
       url: `${URL_SCHEME}${invitationId}`,
     });
   };
+
+  renderVictorText() {
+    const { victor } = this.state;
+
+    if (victor) {
+      return (
+        <Text style={styles.statusText}>
+          Game over, {victor} is victorious!
+        </Text>
+      );
+    }
+    return null;
+  }
 
   renderInvitationMessage() {
     const { invitationId, gameStarted } = this.state;
@@ -288,12 +326,13 @@ export default class PlayerVsFriend extends Component {
       userColor,
       whiteClock,
       blackClock,
+      victor,
     } = this.state;
     const isReverseBoard = userColor === 'b';
     const turn = game.turn();
     const historyLength = game.history().length;
-    const whiteTurn = historyLength > 0 && turn === 'w';
-    const blackTurn = historyLength > 1 && turn === 'b';
+    const whiteTurn = historyLength > 0 && turn === 'w' && !victor;
+    const blackTurn = historyLength > 1 && turn === 'b' && !victor;
 
     if (!initialized) {
       return <ActivityIndicator style={styles.container} animating />;
@@ -312,6 +351,7 @@ export default class PlayerVsFriend extends Component {
           shouldSelectPiece={this.shouldSelectPiece}
           onMove={this.onMove}
         />
+        {this.renderVictorText()}
         <Clock
           time={isReverseBoard ? blackClock : whiteClock}
           enabled={isReverseBoard ? blackTurn : whiteTurn}
@@ -358,5 +398,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     margin: 0,
+  },
+  statusText: {
+    color: 'red',
+    fontSize: 16,
+    margin: 4,
   },
 });
