@@ -2,8 +2,11 @@ import React, { Component } from 'react';
 import { ActivityIndicator, View, StyleSheet, Text } from 'react-native';
 
 import { Chess } from 'chess.js';
+import Sound from 'react-native-sound';
 
 import { Board, Clock } from '../components';
+
+const dongSound = new Sound('dong.mp3', Sound.MAIN_BUNDLE);
 
 export default class PlayerVsLichessAI extends Component {
   static navigationOptions = {
@@ -97,6 +100,7 @@ export default class PlayerVsLichessAI extends Component {
 
     this.ws.onopen = () => {
       this.wsReady = true;
+      dongSound.play();
       this.setState({
         initialized: true,
         userColor: res.player.color === 'white' ? 'w' : 'b',

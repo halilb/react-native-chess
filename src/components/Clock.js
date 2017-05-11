@@ -1,7 +1,10 @@
 import React, { Component, PropTypes } from 'react';
 import { Text, View, StyleSheet } from 'react-native';
 
+import Sound from 'react-native-sound';
+
 const TOTAL_MINUTES = 60;
+const lowTimeSound = new Sound('lowtime.mp3', Sound.MAIN_BUNDLE);
 
 export default class Clock extends Component {
   static propTypes = {
@@ -29,9 +32,18 @@ export default class Clock extends Component {
     this.intervalId = setInterval(
       () => {
         if (this.props.enabled) {
-          this.setState({
-            time: this.state.time - 1,
-          });
+          const { time } = this.state;
+          const playDong = time === 59;
+
+          if (playDong) {
+            lowTimeSound.play();
+          }
+
+          if (time > 0) {
+            this.setState({
+              time: time - 1,
+            });
+          }
         }
       },
       1000,

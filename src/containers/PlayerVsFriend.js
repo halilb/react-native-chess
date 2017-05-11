@@ -3,12 +3,14 @@ import { ActivityIndicator, View, StyleSheet, Text } from 'react-native';
 
 import { Chess } from 'chess.js';
 import Share from 'react-native-share';
+import Sound from 'react-native-sound';
 
 import { Button, Board, Clock } from '../components';
 
 const HTTP_BASE_URL = 'https://en.lichess.org';
 const SOCKET_BASE_URL = 'wss://socket.lichess.org';
 const URL_SCHEME = 'lichess599://';
+const dongSound = new Sound('dong.mp3', Sound.MAIN_BUNDLE);
 
 export default class PlayerVsFriend extends Component {
   static navigationOptions = {
@@ -29,6 +31,7 @@ export default class PlayerVsFriend extends Component {
       userColor: '',
       whiteClock: time,
       blackClock: time,
+      victor: '',
     };
   }
 
@@ -108,6 +111,7 @@ export default class PlayerVsFriend extends Component {
           this.gameFetching = false;
           if (res.url && res.url.socket) {
             this.gameFetched = true;
+            dongSound.play();
 
             const socketUrl = `${SOCKET_BASE_URL}${res.url.socket}?sri=${this.clientId}&mobile=1`;
             this.gameSocketUrl = socketUrl;
