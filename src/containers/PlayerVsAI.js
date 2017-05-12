@@ -4,7 +4,7 @@ import { ActivityIndicator, View, StyleSheet, Text } from 'react-native';
 import { Chess } from 'chess.js';
 import Sound from 'react-native-sound';
 
-import { Board, Clock } from '../components';
+import { Button, Board, Clock } from '../components';
 
 const dongSound = new Sound('dong.mp3', Sound.MAIN_BUNDLE);
 
@@ -29,6 +29,7 @@ export default class PlayerVsLichessAI extends Component {
       whiteClock: time,
       blackClock: time,
       victor: '',
+      resigned: false,
     };
   }
 
@@ -40,6 +41,11 @@ export default class PlayerVsLichessAI extends Component {
     clearInterval(this.interval);
     this.ws = null;
   }
+
+  resign = () => {
+    this.sendMessage({ t: 'resign' });
+    this.setState({ resigned: true });
+  };
 
   createGame() {
     const params = this.props.navigation.state.params || {};
@@ -203,6 +209,7 @@ export default class PlayerVsLichessAI extends Component {
       whiteClock,
       blackClock,
       victor,
+      resigned,
     } = this.state;
     const isReverseBoard = userColor === 'b';
     const turn = game.turn();
@@ -232,6 +239,13 @@ export default class PlayerVsLichessAI extends Component {
           time={isReverseBoard ? blackClock : whiteClock}
           enabled={isReverseBoard ? blackTurn : whiteTurn}
         />
+        {!resigned &&
+          !victor &&
+          <Button
+            style={styles.resignButton}
+            text={resigned ? 'Resigned' : 'Resign'}
+            onPress={this.resign}
+          />}
       </View>
     );
   }
@@ -249,5 +263,9 @@ const styles = StyleSheet.create({
     color: 'red',
     fontSize: 16,
     margin: 4,
+  },
+  resignButton: {
+    width: 200,
+    backgroundColor: 'red',
   },
 });

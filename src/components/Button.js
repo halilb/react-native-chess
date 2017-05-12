@@ -1,9 +1,9 @@
 import React, { PropTypes } from 'react';
 import { TouchableOpacity, Text, View, StyleSheet } from 'react-native';
 
-const Button = ({ text, onPress, style }) => {
+const Button = ({ text, disabled, onPress, style }) => {
   return (
-    <TouchableOpacity onPress={onPress}>
+    <TouchableOpacity onPress={onPress} disabled={disabled}>
       <View style={[styles.button, style]}>
         <Text style={styles.text}>{text}</Text>
       </View>

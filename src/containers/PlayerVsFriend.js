@@ -32,6 +32,7 @@ export default class PlayerVsFriend extends Component {
       whiteClock: time,
       blackClock: time,
       victor: '',
+      resigned: false,
     };
   }
 
@@ -51,6 +52,11 @@ export default class PlayerVsFriend extends Component {
     this.gameSocketUrl = null;
     this.ws = null;
   }
+
+  resign = () => {
+    this.sendMessage({ t: 'resign' });
+    this.setState({ resigned: true });
+  };
 
   createGame(playConfig) {
     fetch(`${HTTP_BASE_URL}/setup/friend`, {
@@ -327,6 +333,8 @@ export default class PlayerVsFriend extends Component {
       whiteClock,
       blackClock,
       victor,
+      resigned,
+      gameStarted,
     } = this.state;
     const isReverseBoard = userColor === 'b';
     const turn = game.turn();
@@ -356,6 +364,14 @@ export default class PlayerVsFriend extends Component {
           time={isReverseBoard ? blackClock : whiteClock}
           enabled={isReverseBoard ? blackTurn : whiteTurn}
         />
+        {!resigned &&
+          gameStarted &&
+          !victor &&
+          <Button
+            style={styles.resignButton}
+            text={resigned ? 'Resigned' : 'Resign'}
+            onPress={this.resign}
+          />}
         {this.renderInvitationMessage()}
       </View>
     );
@@ -403,5 +419,9 @@ const styles = StyleSheet.create({
     color: 'red',
     fontSize: 16,
     margin: 4,
+  },
+  resignButton: {
+    width: 200,
+    backgroundColor: 'red',
   },
 });
