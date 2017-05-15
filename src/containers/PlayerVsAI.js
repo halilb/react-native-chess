@@ -79,23 +79,34 @@ export default class PlayerVsLichessAI extends Component {
       const data = JSON.parse(e.data);
 
       let moveData;
+      let victor;
       if (data.t === 'move' && data.v > game.history().length) {
         moveData = data.d;
+      } else if (data.t === 'end') {
+        victor = data.d;
       } else if (data.t === 'b') {
         // b for batch
         const first = data.d[0];
-        if (first && first.d.status && first.d.status.name === 'mate') {
-          moveData = first.d;
+        if (first) {
+          if (first.d.status && first.d.status.name === 'mate') {
+            moveData = first.d;
+          }
+          if (first.t === 'end') {
+            victor = first.d;
+          }
+          if (first.d.winner) {
+            victor = first.d.winner;
+          }
         }
-      } else if (data.t === 'end') {
-        dongSound.play();
-        this.setState({
-          victor: data.d,
-        });
-        this.ws = null;
       }
 
-      if (moveData) {
+      if (victor) {
+        dongSound.play();
+        this.setState({
+          victor,
+        });
+        this.ws = null;
+      } else if (moveData) {
         const { uci, clock } = moveData;
         const castle = moveData.castle;
         let from = uci.substring(0, 2);

@@ -69,6 +69,10 @@ export default class Clock extends Component {
       Math.floor(time % (TOTAL_MINUTES * TOTAL_MINUTES) / TOTAL_MINUTES);
     let seconds = '' + Math.floor(time % TOTAL_MINUTES);
 
+    if (isNaN(minutes) || isNaN(seconds)) {
+      return null;
+    }
+
     if (minutes.length === 1) {
       minutes = `0${minutes}`;
     }
