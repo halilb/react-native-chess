@@ -7,6 +7,8 @@ import Training from './containers/Training';
 import PlayerVsAI from './containers/PlayerVsAI';
 import PlayerVsFriend from './containers/PlayerVsFriend';
 
+console.disableYellowBox = true;
+
 const Chess = StackNavigator(
   {
     Home: { screen: Home },
