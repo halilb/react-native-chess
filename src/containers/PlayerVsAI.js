@@ -1,12 +1,10 @@
+import Expo from 'expo';
 import React, { Component } from 'react';
 import { ActivityIndicator, View, StyleSheet, Text } from 'react-native';
 
 import { Chess } from 'chess.js';
-import Sound from 'react-native-sound';
 
 import { Button, Board, Clock } from '../components';
-
-const dongSound = new Sound('dong.mp3', Sound.MAIN_BUNDLE);
 
 export default class PlayerVsLichessAI extends Component {
   static navigationOptions = {
@@ -101,7 +99,7 @@ export default class PlayerVsLichessAI extends Component {
       }
 
       if (victor) {
-        dongSound.play();
+        this.playDongSound();
         this.setState({
           victor,
         });
@@ -131,7 +129,7 @@ export default class PlayerVsLichessAI extends Component {
 
     this.ws.onopen = () => {
       this.wsReady = true;
-      dongSound.play();
+      this.playDongSound();
       this.setState({
         initialized: true,
         userColor: res.player.color === 'white' ? 'w' : 'b',
@@ -149,6 +147,13 @@ export default class PlayerVsLichessAI extends Component {
       );
     };
   };
+
+  playDongSound() {
+    Expo.Audio.Sound.create(
+      require('../../sounds/dong.mp3'),
+      { shouldPlay: true }
+    );
+  }
 
   sendMessage(obj) {
     if (this.wsReady && this.ws) {

@@ -1,3 +1,4 @@
+import Expo from 'expo';
 import React from 'react';
 import { AppRegistry, Text } from 'react-native';
 import { StackNavigator } from 'react-navigation';
@@ -21,4 +22,4 @@ const Chess = StackNavigator(
   },
 );
 
-AppRegistry.registerComponent('Chess', () => Chess);
+Expo.registerRootComponent(Chess);

@@ -1,16 +1,17 @@
+import Expo from 'expo';
 import React, { Component } from 'react';
-import { ActivityIndicator, View, StyleSheet, Text } from 'react-native';
+import { ActionSheetIOS, ActivityIndicator, View, StyleSheet, Text } from 'react-native';
 
 import { Chess } from 'chess.js';
-import Share from 'react-native-share';
-import Sound from 'react-native-sound';
 
 import { Button, Board, Clock } from '../components';
 
 const HTTP_BASE_URL = 'https://en.lichess.org';
 const SOCKET_BASE_URL = 'wss://socket.lichess.org';
 const URL_SCHEME = 'lichess599://';
-const dongSound = new Sound('dong.mp3', Sound.MAIN_BUNDLE);
+
+const dongSound = new Expo.Audio.Sound();
+dongSound.loadAsync(require('../../sounds/dong.mp3'));
 
 export default class PlayerVsFriend extends Component {
   static navigationOptions = {
@@ -117,7 +118,7 @@ export default class PlayerVsFriend extends Component {
           this.gameFetching = false;
           if (res.url && res.url.socket) {
             this.gameFetched = true;
-            dongSound.play();
+            dongSound.playAsync();
 
             const socketUrl = `${SOCKET_BASE_URL}${res.url.socket}?sri=${this.clientId}&mobile=1`;
             this.gameSocketUrl = socketUrl;
@@ -178,7 +179,7 @@ export default class PlayerVsFriend extends Component {
       }
 
       if (victor) {
-        dongSound.play();
+        dongSound.playAsync();
         this.setState({
           victor,
         });
@@ -280,10 +281,12 @@ export default class PlayerVsFriend extends Component {
 
   share = () => {
     const { invitationId } = this.state;
-    Share.open({
-      title: "Let's play chess",
+    ActionSheetIOS.showShareActionSheetWithOptions({
       url: `${URL_SCHEME}${invitationId}`,
-    });
+      subject: "Let's play chess",
+    },
+    (error) => alert(error),
+    () => {});
   };
 
   renderVictorText() {

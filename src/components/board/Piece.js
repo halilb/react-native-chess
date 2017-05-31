@@ -1,3 +1,4 @@
+import Expo from 'expo';
 import React, { Component, PropTypes } from 'react';
 import { TouchableWithoutFeedback, Image } from 'react-native';
 
@@ -55,6 +56,7 @@ export default class Piece extends Component {
       reverseBoard,
     } = this.props;
     const pieceImageSource = PIECE_IMAGES[type][color];
+    Expo.Asset.fromModule(pieceImageSource).downloadAsync();
 
     return (
       <TouchableWithoutFeedback onPress={this.onSelected}>

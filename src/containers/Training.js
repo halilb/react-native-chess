@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 
 import { Chess } from 'chess.js';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import { FontAwesome as Icon } from '@expo/vector-icons';
 
 import { Button, Board } from '../components';
 

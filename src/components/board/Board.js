@@ -1,8 +1,8 @@
+import Expo from 'expo';
 import React, { Component, PropTypes } from 'react';
 import { Dimensions, View, StyleSheet } from 'react-native';
 
 import { Chess } from 'chess.js';
-import Sound from 'react-native-sound';
 
 import Square from './Square';
 import Piece from './Piece';
@@ -11,8 +11,10 @@ const screenWidth = Dimensions.get('window').width;
 const DIMENSION = 8;
 const COLUMN_NAMES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
-const moveSound = new Sound('move.mp3', Sound.MAIN_BUNDLE);
-const captureSound = new Sound('capture.mp3', Sound.MAIN_BUNDLE);
+const captureSound = new Expo.Audio.Sound();
+captureSound.loadAsync(require('../../../sounds/capture.mp3'));
+const moveSound = new Expo.Audio.Sound();
+moveSound.loadAsync(require('../../../sounds/move.mp3'));
 
 export default class BoardView extends Component {
   static propTypes = {
@@ -53,6 +55,13 @@ export default class BoardView extends Component {
     }
   }
 
+  playMoveSound() {
+    Expo.Audio.Sound.create(
+      require('../../../sounds/move.mp3'),
+      { shouldPlay: true }
+    );
+  }
+
   movePiece = (to, from) => {
     const { onMove } = this.props;
     const { game, board } = this.state;
@@ -65,9 +74,12 @@ export default class BoardView extends Component {
     const moveResult = game.move(moveConfig);
 
     if (moveResult && moveResult.captured) {
-      captureSound.play();
+      Expo.Audio.Sound.create(
+        require('../../../sounds/capture.mp3'),
+        { shouldPlay: true }
+      );
     } else {
-      moveSound.play();
+      this.playMoveSound();
     }
 
     onMove(moveConfig);
@@ -79,7 +91,7 @@ export default class BoardView extends Component {
 
   undo = () => {
     const { game } = this.state;
-    moveSound.play();
+    this.playMoveSound();
     game.undo();
     this.setState({
       board: this.createBoardData(game),

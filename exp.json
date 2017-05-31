@@ -1,0 +1,21 @@
+{
+  "name": "expo-chess",
+  "description": "A simple Chess app",
+  "slug": "expo-chess",
+  "privacy": "public",
+  "sdkVersion": "17.0.0",
+  "version": "1.0.0",
+  "orientation": "portrait",
+  "primaryColor": "#cccccc",
+  "icon": "./ios/Chess/Images.xcassets/AppIcon.appiconset/icon-83.5@2x.png",
+  "loading": {
+    "icon": "./assets/icons/loading.png",
+    "hideExponentText": false
+  },
+  "packagerOpts": {
+    "assetExts": ["ttf", "mp4"]
+  },
+  "ios": {
+    "supportsTablet": true
+  }
+}

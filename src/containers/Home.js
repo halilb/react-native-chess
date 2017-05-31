@@ -3,7 +3,6 @@ import {
   ActivityIndicator,
   Slider,
   Text,
-  Linking,
   StyleSheet,
   View,
   TouchableOpacity,
@@ -41,13 +40,6 @@ export default class HomeScreen extends Component {
   }
 
   componentDidMount() {
-    Linking.getInitialURL().then(url => {
-      if (url) {
-        this.handleOpenURL(url);
-      }
-    });
-
-    Linking.addEventListener('url', event => this.handleOpenURL(event.url));
     // sets session cookie
     fetch(`${HTTP_BASE_URL}/account/info`).then(this.getDailyPuzzle);
   }
@@ -248,11 +240,6 @@ export default class HomeScreen extends Component {
           style={styles.button}
           text={'Play with the machine'}
           onPress={() => this.displayModal(true)}
-        />
-        <Button
-          style={styles.button}
-          text={'Play with a friend'}
-          onPress={() => this.displayModal(false)}
         />
         {this.renderModal()}
         {this.renderActivityIndicator()}
