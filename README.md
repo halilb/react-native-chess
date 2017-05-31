@@ -25,3 +25,6 @@ $ react-native run-ios
 ### Running on Expo
 I created a branch to make the app work on [Expo](https://expo.io). Checkout [expo branch](https://github.com/halilb/react-native-chess/tree/expo).
 - [Open this app in Expo](https://expo.io/@halilbilir/expo-chess)
+
+### Licence
+[MIT](http://opensource.org/licenses/mit-license.html)
