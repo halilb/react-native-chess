@@ -45,6 +45,22 @@ export default class Piece extends Component {
     onSelected(position);
   };
 
+  // verify if piece has move before authorize new renderer
+  shouldComponentUpdate(nextProps, nextState) {
+
+    // check props dependencies of piece renderer
+    const {rowIndex, columnIndex, reverseBoard, type, color} = nextProps;
+
+    return (
+      rowIndex !== this.props.rowIndex ||
+      columnIndex !== this.props.columnIndex ||
+      reverseBoard !== this.props.reverseBoard ||
+      type !== this.props.type ||
+      color !== this.props.color
+    );
+
+  }
+
   render() {
     const {
       type,

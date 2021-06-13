@@ -91,6 +91,22 @@ export default class Board extends Component {
     return null;
   }
 
+  // verify if square is update before authorize new renderer
+  shouldComponentUpdate(nextProps, nextState) {
+
+    // check props dependencies square renderer
+    const {selected, lastMove, canMoveHere, inCheck, reverseBoard} = nextProps;
+
+    return (
+      selected !== this.props.selected ||
+      lastMove !== this.props.lastMove ||
+      canMoveHere !== this.props.canMoveHere ||
+      inCheck !== this.props.inCheck ||
+      reverseBoard !== this.props.reverseBoard
+    );
+
+  }
+
   render() {
     const {
       size,
