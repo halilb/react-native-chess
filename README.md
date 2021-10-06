@@ -1,3 +1,11 @@
+# Archived project. No maintenance.
+
+Lichess didn't have an API when I built this project years ago. So I had to reverse engineer their websocket communication. This has surprisingly worked well over the years until recently.
+
+So this project needs a rewrite using [Lichess API](https://lichess.org/api) and latest dependencies to work. I'm archiving it since I don't have any free time to invest nowadays.
+
+Thank you for your interest!
+
 # react-native-chess
 This is a simple chess client I built as a school project. It uses awesome [Lichess](https://lichess.org/) platform as backend and puzzle sources.
 
